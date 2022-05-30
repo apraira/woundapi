@@ -38,6 +38,9 @@ def delete_user(data):
     collection = get_collection("user")
     collection.delete_one(data)
 
+
+"""get bill category"""
+
 def get_bill_category(cat):
     collection = get_collection("bill")
     row = collection.find_one(cat)

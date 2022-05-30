@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, render_template
+from flask import Flask, jsonify, render_template
 from . import db
 from . import submission, user
 
@@ -19,10 +19,16 @@ def create_app(test_config=None):
     app.register_blueprint(submission.bp)    
     app.register_blueprint(user.bp)
 
+    ####routing
+
     @app.route('/index')
     @app.route('/')
     def index():
         return render_template('index.html')
+
+    @app.route('/test', methods = ["POST"])
+    def post_user():
+        return "testing"
 
     @app.errorhandler(404)
     def page_not_found(e):
