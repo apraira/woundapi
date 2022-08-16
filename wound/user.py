@@ -70,6 +70,27 @@ def find_user(username,passw):
         print (ex)
         return Response(response = json.dumps({"message" : "false"}), mimetype="application/json", status=500)
 
+#cek perawat berdasarkan id
+#mendapatkan data pasien berdasarkan id/nrm
+@bp.route('/user/<nrm>', methods =['GET'])
+def cek_data_perawat(nrm):
+    try:
+        filter = {}
+        filter["_id"] = int(nrm)
+        cek = get_user(filter)
+
+       
+        if cek == None: 
+            return Response(response = json.dumps({"message" : "not found"}), mimetype="application/json", status=404)
+        else:
+            print(cek)
+            return Response(response = json.dumps(dict(cek)), mimetype="application/json", status=200)
+
+    except Exception as ex:
+        print("internal server error")
+        return Response(response = json.dumps({"message" : "false"}), mimetype="application/json", status=500)
+
+
 """#delete
 @bp.route('/user/delete/<username>/<passw>', methods=["DELETE"])
 def delete_user(username,passw):
