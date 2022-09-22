@@ -5,7 +5,7 @@ from flask import(
 
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
-from wound.db import get_db, get_users, get_user, insert_user, update_user, delete_user, get_bill_category
+from wound.user.db import get_db, get_users, get_user, insert_user, update_user, delete_user, get_bill_category
 from . import utils
 from bson.objectid import ObjectId
 

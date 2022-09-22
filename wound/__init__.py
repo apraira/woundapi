@@ -1,8 +1,12 @@
 import os
-
+from flask import(
+    Blueprint, Response, request)
 from flask import Flask, jsonify, render_template
-from . import db
-from . import submission, user, pasien
+from wound.user import db
+from . import submission
+from wound.user import user
+from wound.pasien import pasien
+from wound.image import upload
 
 def create_app(test_config=None):
     #create and configure the app
@@ -19,6 +23,7 @@ def create_app(test_config=None):
     app.register_blueprint(submission.bp)    
     app.register_blueprint(user.bp)
     app.register_blueprint(pasien.bp)
+    app.register_blueprint(upload.bp)
 
     ####routing
 
@@ -36,4 +41,6 @@ def create_app(test_config=None):
         # note that we set the 404 status explicitly
         return render_template('404.html'), 404
 
-    return app
+    return app 
+
+    

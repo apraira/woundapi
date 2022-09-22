@@ -1,3 +1,4 @@
+'''
 from flask import(
     Blueprint, Response, flash, g, redirect, render_template, request, session, url_for, current_app, Markup, send_from_directory
 )
@@ -11,7 +12,6 @@ from . import db
 from flask import Flask, jsonify
 from bson.objectid import ObjectId
 from typing import List
-
 
 bp = Blueprint('pasien', __name__, url_prefix='/')
 
@@ -100,3 +100,4 @@ def cek_data_perawat_pasien(id_perawat):
         print(ex)
         print("internal server error")
         return Response(response = json.dumps({"message" : "false"}), mimetype="application/json", status=500)
+        '''
