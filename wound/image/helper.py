@@ -1,3 +1,4 @@
+from typing import Collection
 import click
 import pymongo
 from flask import current_app, g
@@ -22,3 +23,83 @@ def get_collection(colname):
 def get_images(filter={}):
     collection = get_collection("image")
     return collection.find(filter)
+
+#get 1 image
+def get_image(filter={}):
+    collection = get_collection("image")
+    return collection.find_one(filter)
+
+def insert_image(data):
+    collection = get_collection("image")
+    row = collection.insert_one(data)
+    return row
+    
+def update_image(id, update):
+    collection = get_collection("image")
+    myquery = { "id" : id }
+    newvalues = { "$set": { "update": update } }
+    return collection.update_one(myquery, newvalues, upsert=False)
+
+#nambahin id gambar ke list image
+def update_image_user(id_pasien, data):
+    collection = get_collection("pasien")
+
+    #cursor ke data pasien sesuai dengan id
+    x = collection.find_one({ "_id" : id_pasien })
+
+    #ambil data list yang udah ada dari pasien sesuai dengan id
+    List = x["list_image_id"]
+    
+    #masukin data baru ke List
+    List.append(data)
+
+    #query ke id pasien + update data
+    myquery = { "_id" : id_pasien }
+    newvalues = { "$set": { "list_image_id": List } }
+    return collection.update_one(myquery, newvalues, upsert=False)
+
+#dapetin list image yang udah dipunya pasien
+def pasien_image_list(id_pasien):
+    collection = get_collection("pasien")
+
+    #cursor ke data pasien sesuai dengan id
+    x = collection.find_one({ "_id" : id_pasien })
+
+    #ambil data list yang udah ada dari pasien sesuai dengan id
+    List = x["list_image_id"]    
+
+    return List
+
+#nyari filename dari id_image
+def search_filename_from_id(id):
+    collection = get_collection("image")
+
+    #cursor ke data image sesuai dengan id
+    x = collection.find_one({"_id" : id})
+
+    #masukin filename ke variabel baru
+    filename = x["filename"]
+
+    return filename
+
+#nyari filename dari id_image
+def search_filename_from_id(id):
+    collection = get_collection("image")
+
+    #cursor ke data image sesuai dengan id
+    x = collection.find_one({"_id" : id})
+
+    #masukin filename ke variabel baru
+    filename = x["filename"]
+
+    return filename
+
+def delete_one_image(id):
+    collection = get_collection("image")    
+    return collection.delete_one({"_id":id})
+
+
+#cari list images dr id pasien
+def image_list_by_id(data):
+    collection = get_collection("image")
+    return collection.find(data)

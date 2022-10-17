@@ -7,6 +7,7 @@ from . import submission
 from wound.user import user
 from wound.pasien import pasien
 from wound.image import upload
+from wound.data_kajian import datakajian
 
 def create_app(test_config=None):
     #create and configure the app
@@ -24,6 +25,7 @@ def create_app(test_config=None):
     app.register_blueprint(user.bp)
     app.register_blueprint(pasien.bp)
     app.register_blueprint(upload.bp)
+    app.register_blueprint(datakajian.bp)
 
     ####routing
 

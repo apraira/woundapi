@@ -27,7 +27,7 @@ def get_pasiens():
 def addpasien():
     try:        
             data = {"_id": request.form['_id'],
-                    "id_perawat": request.form['id_perawat'],
+                    "id_perawat": int(request.form['id_perawat']),
                     "nama":request.form['nama'],
                     "agama":request.form['agama'],
                     "born_date":request.form['born_date'],
@@ -37,7 +37,8 @@ def addpasien():
                     "no_hp": request.form['no_hp'],
                     "email": request.form['email'],
                     "created_at" : time.strftime("%d/%m/%Y %H:%M:%S"),
-                    "updated_at" : time.strftime("%d/%m/%Y %H:%M:%S")
+                    "updated_at" : time.strftime("%d/%m/%Y %H:%M:%S"),
+                    "list_image_id": []
                     }
 
             cek = get_pasien(data)
