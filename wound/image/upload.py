@@ -4,6 +4,7 @@ import uuid
 from flask import(
     Blueprint, Response, request)
 import json
+import datetime
 
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
@@ -32,8 +33,9 @@ bp = Blueprint('upload', __name__, url_prefix='/')
 def post_image():
                  
     #next save the file
-    id = uuid.uuid4().hex
+    
     file = request.files['image']
+    id = request.form['id']
     id_pasien = request.form['id_pasien']   
 
     try:
@@ -62,6 +64,69 @@ def post_image():
 
             print(filepath)
             current_app.logger.debug(filepath);         
+        return Response(response = json.dumps({"message" : "true"}), mimetype="application/json", status=200)
+        
+    except Exception as ex:
+        print (ex)
+        return Response(response = json.dumps({"message" : "error encountered"}), mimetype="application/json", status=500)
+
+
+
+
+#upload gambar svg
+@bp.route('/upload_svg', methods =['POST'])
+def post_svg():
+                 
+    #next save the file
+    
+    paths= request.form['paths']
+    print(paths)
+    id = str(uuid.uuid4().hex)
+    id_pasien = request.form['id_pasien']   
+
+    try:
+        output_str = paths.replace(', ', ' ').replace('[', '').replace(']', '').replace(","," ")
+        canvas ='<svg width="1080" height="1441" viewBox="0 0 1080 1441" fill="none" xmlns="http://www.w3.org/2000/svg">'
+        path ='<path d="' + output_str + '" stroke="black"/>'
+        close = '</svg>'
+        svg = canvas + path + close
+
+
+        path = os.path.join(current_app.instance_path, current_app.config['UPLOAD_DIR'])
+        try:
+            os.makedirs(path)
+        except OSError:
+            pass
+        
+
+        date = str(datetime.datetime.now().replace(microsecond=0)).replace("-","").replace(" ","_").replace(':', "")
+
+        filename = id_pasien + "_" + date + ".svg"
+        filepath = os.path.join(path, filename)
+
+        svg_file = open(filepath, "w")
+ 
+        #write string to file
+        svg_file.write(svg)
+ 
+        #close file
+        svg_file.close()
+                       
+        data = {"_id": id,
+                    "id_pasien": id_pasien,
+                    "id_perawat": request.form['id_perawat'],
+                    "filename":filename,
+                    "filepath":path,
+                    "category":"Vector",
+                    "created_at" : time.strftime("%d/%m/%Y %H:%M:%S"),
+                    "updated_at" : time.strftime("%d/%m/%Y %H:%M:%S"),
+                    }
+        insert_image(data)
+        helper.update_image_user(id_pasien, id)  
+        
+        print(filepath)
+        current_app.logger.debug(filepath);
+      
         return Response(response = json.dumps({"message" : "true"}), mimetype="application/json", status=200)
         
     except Exception as ex:
@@ -100,8 +165,19 @@ def get_one_image(id):
 @bp.route('/delete_image/<id>', methods= ['DELETE'])
 def delete_image(id):
     ide = id
+    filename = search_filename_from_id(ide)
+    filter = {}
+    filter["_id"] = ide
+    cek = get_image(filter)
+    path = os.path.join(current_app.instance_path, current_app.config['UPLOAD_DIR'])
+    try:
+        os.makedirs(path)
+    except OSError:
+        pass
+    filepath = os.path.join(path, filename)
+    os.remove(filepath)
     helper.delete_one_image(ide)
-    return Response(response = json.dumps({"message" : "1 image deleted"}), mimetype="application/json", status=200)
+    return Response(response = json.dumps(dict(cek)), mimetype="application/json", status=200)
 
   
 #download gambar tapi via image id

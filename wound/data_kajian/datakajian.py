@@ -83,7 +83,7 @@ def get_one_kajian(id):
         return Response(response = json.dumps({"message" : "false"}), mimetype="application/json", status=500)
 
 
-#delete 1 image berdasarkan id
+#delete 1 kajian berdasarkan id kajian
 @bp.route('/delete_kajian/<id>', methods= ['DELETE'])
 def delete_kajian(id):
     ide = id
