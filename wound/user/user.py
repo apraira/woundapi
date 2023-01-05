@@ -6,7 +6,7 @@ from flask import(
 
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
-from wound.user.db import delete_user, get_db, get_collection, get_user, get_users, insert_user, update_user
+from wound.user.db import delete_user, get_db, get_collection, get_user, get_users, insert_user, update_user, get_nama_user
 from wound import utils
 from . import db
 from flask import Flask, jsonify
@@ -35,7 +35,7 @@ def create_user(name, username, email, passw):
         if cek == None: 
             a = list(db.get_users())
 
-            data = {"_id": 8200000 + len(a) + 1,
+            data = {"_id": 820000000 + len(a) + 1,
                     "name":name,
                     "username":username,
                     "email": email,
@@ -70,23 +70,42 @@ def find_user(username,passw):
         print (ex)
         return Response(response = json.dumps({"message" : "false"}), mimetype="application/json", status=500)
 
-#cek perawat berdasarkan id
+#cek perawat berdasarkan id atau username
 @bp.route('/user/<username>', methods =['GET'])
 def cek_data_perawat(username):
     try:
+
         filter = {}
-        filter["username"] = username
-        cek = get_user(filter)
+        filter2 = {}
+
+        if username.isnumeric() == True:
+            filter["_id"] = int(username)
+        else:
+            filter["_id"] = username        
+        
+        filter2["username"] = username
+
+        teee = {"$or":[ filter, filter2]}
+
+        cek = get_user(teee)
+        test = dict(cek)
+
+        result ={}
+        result["_id"] = test["_id"]
+        result["name"] = test["name"]
+        result["username"] = test["username"]
+        result ["email"] = test["email"]
+        result["password"] = ""
 
        
         if cek == None: 
             return Response(response = json.dumps({"message" : "not found"}), mimetype="application/json", status=404)
         else:
             print(cek)
-            return Response(response = json.dumps(dict(cek)), mimetype="application/json", status=200)
+            return Response(response = json.dumps(result), mimetype="application/json", status=200)
 
     except Exception as ex:
-        print("internal server error")
+        print(ex)
         return Response(response = json.dumps({"message" : "false"}), mimetype="application/json", status=500)
 
 

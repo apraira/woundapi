@@ -24,6 +24,11 @@ def get_images(filter={}):
     collection = get_collection("image")
     return collection.find(filter)
 
+def get_imagess(data):
+    collection = get_collection("image")
+    return collection.find(data)
+
+
 #get 1 image
 def get_image(filter={}):
     collection = get_collection("image")

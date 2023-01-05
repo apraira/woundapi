@@ -24,6 +24,10 @@ def get_users(filter={}):
 def get_user(filter={}):
     collection = get_collection("user")
     return collection.find_one(filter)
+
+def get_nama_user(filter={}, filter2={}):
+    collection = get_collection("user")
+    return collection.find({"$or":[ filter, filter2]})
     
 
 def insert_user(data):

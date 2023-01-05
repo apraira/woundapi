@@ -2,14 +2,14 @@ from uuid import uuid1
 import numpy as np
 import uuid
 from flask import(
-    Blueprint, Response, request)
+    Blueprint, Response, request, send_file)
 import json
 import datetime
 
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 from wound.image import helper
-from wound.image.helper import get_images, image_list_by_id, insert_image, search_filename_from_id, update_image, get_image
+from wound.image.helper import get_images, get_imagess, image_list_by_id, insert_image, search_filename_from_id, update_image, get_image
 from wound.pasien.helper import  get_pasien, insert_pasien, get_pasien_ns
 from wound import utils
 from flask import Flask, jsonify
@@ -55,12 +55,19 @@ def post_image():
                     "id_perawat": request.form['id_perawat'],
                     "filename":filename,
                     "filepath":path,
+                    "type":request.form['type'],
                     "category":request.form['category'],
                     "created_at" : time.strftime("%d/%m/%Y %H:%M:%S"),
                     "updated_at" : time.strftime("%d/%m/%Y %H:%M:%S"),
                     }
             insert_image(data)
-            helper.update_image_user(id_pasien, id)  
+
+            if id_pasien == "all":
+                print("all")
+            else:
+                helper.update_image_user(id_pasien, id)
+            
+              
 
             print(filepath)
             current_app.logger.debug(filepath);         
@@ -69,6 +76,132 @@ def post_image():
     except Exception as ex:
         print (ex)
         return Response(response = json.dumps({"message" : "error encountered"}), mimetype="application/json", status=500)
+
+#download all in folder
+import zipfile
+@bp.route('/download_files', methods=["GET"])
+def download_all():
+    path = os.path.join(current_app.instance_path, current_app.config['UPLOAD_DIR']).replace("uploads","")
+
+    #lokasi folder
+    folderLocation = os.path.join(current_app.instance_path, current_app.config['UPLOAD_DIR'])
+    dir = os.path.join(path, "zip")
+    namafile = "imagefiles.zip"
+    fixedfilename = os.path.join(dir, namafile)
+
+    print(fixedfilename)
+
+    # zip all the files which are inside in the folder
+    zf = zipfile.ZipFile(fixedfilename, "w")
+    for dirname, subdirs, files in os.walk(folderLocation):
+        zf.write(dirname)
+        for filename in files:
+            zf.write(os.path.join(dirname, filename))
+    zf.close()
+
+    dir = os.path.join(path, "zip")
+
+    return send_from_directory( dir, "imagefiles.zip", as_attachment=True)
+
+
+#download all from category
+@bp.route('/download_files_category/<category>', methods=["GET"])
+def download_category(category):
+    filter = {}
+    filter["category"] = category
+    data = {"category" : category}
+    cek = image_list_by_id(data)
+
+       
+    if cek == None: 
+        return Response(response = json.dumps({"message" : "not found"}), mimetype="application/json", status=404)
+    else:
+        a = []
+        for doc in cek:
+            a.append(doc)
+
+    #for i in a:
+        #print(i["filename"])
+
+
+    path = os.path.join(current_app.instance_path, current_app.config['UPLOAD_DIR']).replace("uploads","")
+
+    #lokasi folder
+    folderLocation = os.path.join(current_app.instance_path, current_app.config['UPLOAD_DIR'])
+    dir = os.path.join(path, "zip")
+    namafile = "imagefiles.zip"
+    fixedfilename = os.path.join(dir, namafile)
+
+    print(fixedfilename)
+
+    # zip all the files which are inside in the folder
+    zf = zipfile.ZipFile(fixedfilename, "w")
+    for dirname, subdirs, files in os.walk(folderLocation):
+        zf.write(dirname)
+        for filename in files:
+            for i in a:
+                if filename == i["filename"]:
+                    print(filename)
+                    zf.write(os.path.join(dirname, filename))
+    zf.close()
+
+    dir = os.path.join(path, "zip")
+
+    return send_from_directory( dir, "imagefiles.zip", as_attachment=True)
+
+
+    # Delete the zip file if not needed
+    os.remove("imagefiles.zip")
+
+#download all from id pasien
+@bp.route('/download_files_pasien/<id_pasien>', methods=["GET"])
+def download_pasien(id_pasien):
+    filter = {}
+    filter["id_pasien"] = id_pasien
+    data = {"id_pasien" : id_pasien}
+    cek = image_list_by_id(data)
+    a = []
+       
+    if cek == None: 
+        return Response(response = json.dumps({"message" : "not found"}), mimetype="application/json", status=404)
+    else:
+        
+        for doc in cek:
+            a.append(doc)
+
+    #for i in a:
+        #print(i["filename"])
+
+
+    path = os.path.join(current_app.instance_path, current_app.config['UPLOAD_DIR']).replace("uploads","")
+
+    #lokasi folder
+    folderLocation = os.path.join(current_app.instance_path, current_app.config['UPLOAD_DIR'])
+    dir = os.path.join(path, "zip")
+    namafile = "imagefiles.zip"
+    fixedfilename = os.path.join(dir, namafile)
+
+    print(fixedfilename)
+
+    # zip all the files which are inside in the folder
+    zf = zipfile.ZipFile(fixedfilename, "w")
+    for dirname, subdirs, files in os.walk(folderLocation):
+        zf.write(dirname)
+        for filename in files:
+            for i in a:
+                if filename == i["filename"]:
+                    print(filename)
+                    zf.write(os.path.join(dirname, filename))
+    zf.close()
+
+    dir = os.path.join(path, "zip")
+
+    return send_from_directory( dir, "imagefiles.zip", as_attachment=True)
+
+
+
+    # Delete the zip file if not needed
+    os.remove("imagefiles.zip")
 
 
 
@@ -87,7 +220,7 @@ def post_svg():
     try:
         output_str = paths.replace(', ', ' ').replace('[', '').replace(']', '').replace(","," ")
         canvas ='<svg width="1080" height="1441" viewBox="0 0 1080 1441" fill="none" xmlns="http://www.w3.org/2000/svg">'
-        path ='<path d="' + output_str + '" stroke="black"/>'
+        path ='<path d="' + output_str + '" stroke="black" stroke-width="10"/>'
         close = '</svg>'
         svg = canvas + path + close
 
@@ -117,7 +250,79 @@ def post_svg():
                     "id_perawat": request.form['id_perawat'],
                     "filename":filename,
                     "filepath":path,
-                    "category":"Vector",
+                    "type":"Vector",
+                    "category":request.form['category'],
+                    "created_at" : time.strftime("%d/%m/%Y %H:%M:%S"),
+                    "updated_at" : time.strftime("%d/%m/%Y %H:%M:%S"),
+                    }
+        insert_image(data)
+        helper.update_image_user(id_pasien, id)  
+        
+        print(filepath)
+        current_app.logger.debug(filepath);
+      
+        return Response(response = json.dumps({"message" : "true"}), mimetype="application/json", status=200)
+        
+    except Exception as ex:
+        print (ex)
+        return Response(response = json.dumps({"message" : "error encountered"}), mimetype="application/json", status=500)
+
+
+#upload gambar svg
+@bp.route('/upload_svg_3', methods =['POST'])
+def post_svg_3():
+                 
+    #next save the file
+    
+    paths= request.form['paths']
+    paths2 = request.form ['paths2']
+    paths3 = request.form['paths3']
+    print(paths)
+    id = str(uuid.uuid4().hex)
+    id_pasien = request.form['id_pasien']   
+
+    try:
+        
+        paths = paths.replace(', ', ' ').replace('[', '').replace(']', '').replace(","," ")
+        paths2 = paths2.replace(', ', ' ').replace('[', '').replace(']', '').replace(","," ")
+        paths3 = paths3.replace(', ', ' ').replace('[', '').replace(']', '').replace(","," ")
+        canvas ='<svg width="1080" height="1441" viewBox="0 0 1080 1441" fill="none" xmlns="http://www.w3.org/2000/svg">'
+        path1 ='<path d="' + paths + '" stroke="black" stroke-width="10"/>'
+        path2 ='<path d="' + paths2 + '" stroke="black" stroke-width="10"/>'
+        path3 ='<path d="' + paths3 + '" stroke="black" stroke-width="10"/>'
+
+        close = '</svg>'
+
+        svg = canvas + path1 + path2 + path3 + close
+
+
+        path = os.path.join(current_app.instance_path, current_app.config['UPLOAD_DIR'])
+        try:
+            os.makedirs(path)
+        except OSError:
+            pass
+        
+
+        date = str(datetime.datetime.now().replace(microsecond=0)).replace("-","").replace(" ","_").replace(':', "")
+
+        filename = id_pasien + "_" + date + ".svg"
+        filepath = os.path.join(path, filename)
+
+        svg_file = open(filepath, "w")
+ 
+        #write string to file
+        svg_file.write(svg)
+ 
+        #close file
+        svg_file.close()
+                       
+        data = {"_id": id,
+                    "id_pasien": id_pasien,
+                    "id_perawat": request.form['id_perawat'],
+                    "filename":filename,
+                    "filepath":path,
+                    "type":"Vector",
+                    "category":request.form['category'],
                     "created_at" : time.strftime("%d/%m/%Y %H:%M:%S"),
                     "updated_at" : time.strftime("%d/%m/%Y %H:%M:%S"),
                     }

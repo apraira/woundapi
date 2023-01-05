@@ -46,6 +46,8 @@ def post_kajian():
                     "granulation":request.form['granulation'],
                     "epithelization":request.form['epithelization'],
                     "raw_photo_id": request.form['raw_photo_id'],
+                    "tepi_image_id": request.form['tepi_image_id'],
+                    "diameter_image_id": request.form['diameter_image_id'],
                     "created_at" : time.strftime("%d/%m/%Y %H:%M:%S")
                     }
         insert_kajian(data)        
