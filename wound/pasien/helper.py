@@ -41,3 +41,7 @@ def update_pasien(filter, update):
 def delete_pasien(data):
     collection = get_collection("pasien")
     collection.delete_one(data)
+
+def delete_one_pasien(id):
+    collection = get_collection("pasien")    
+    return collection.delete_one({"_id":id})

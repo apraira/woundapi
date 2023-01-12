@@ -32,7 +32,10 @@ bp = Blueprint('logactivity', __name__, url_prefix='/')
 @bp.route('/get_logs', methods =['GET'])
 def get_all_log():
     a = get_logs()
-    return Response(response = json.dumps(list(a)), mimetype="application/json", status=200)
+    hiya = list(a)
+    hiya.reverse()
+    #return Response(response = json.dumps(list(a)), mimetype="application/json", status=200)
+    return render_template('user_log.html', navigation=hiya)
 
 #menampilkan seluruh dokumen pada collection log_activity yang dimiliki satu user
 @bp.route('/get_logs/<id_user>', methods =['GET'])

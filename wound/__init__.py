@@ -1,6 +1,6 @@
 import os
 from flask import(
-    Blueprint, Response, request)
+    Blueprint, Response, redirect, request)
 from flask import Flask, jsonify, render_template
 from wound.user import db
 from . import submission
@@ -31,10 +31,18 @@ def create_app(test_config=None):
 
     ####routing
 
+    """@app.before_request
+    def before_request():
+        if request.is_secure:
+            url = request.url.replace('https://', 'http://', 1)
+            code = 301
+            return redirect(url, code=code)"""
+
     @app.route('/index')
     @app.route('/')
     def index():
-        return render_template('index.html')
+        your_list= [1,2,3,4]
+        return render_template('index.html', navigation=your_list)
 
     @app.route('/test', methods = ["POST"])
     def post_user():

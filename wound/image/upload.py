@@ -154,8 +154,9 @@ def download_category(category):
     os.remove("imagefiles.zip")
 
 #download all from id pasien
-@bp.route('/download_files_pasien/<id_pasien>', methods=["GET"])
-def download_pasien(id_pasien):
+@bp.route('/download_files_pasien/', methods=["GET"])
+def download_pasien():
+    id_pasien = request.args.get("nrm")
     filter = {}
     filter["id_pasien"] = id_pasien
     data = {"id_pasien" : id_pasien}

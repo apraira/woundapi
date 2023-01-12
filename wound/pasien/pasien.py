@@ -4,7 +4,7 @@ import json
 
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
-from wound.pasien.helper import  get_pasien, insert_pasien, get_pasien_ns
+from wound.pasien.helper import  delete_one_pasien, get_pasien, insert_pasien, get_pasien_ns
 from wound import utils
 from wound import db
 from flask import Flask, jsonify
@@ -76,6 +76,16 @@ def cek_data_pasien(nrm):
         print("internal server error")
         return Response(response = json.dumps({"message" : "false"}), mimetype="application/json", status=500)
 
+#delete 1 pasien berdasarkan id
+@bp.route('/pasien/<id>', methods= ['DELETE'])
+def delete_pasien(id):
+    ide = id
+    filter = {}
+    filter["_id"] = ide
+    cek = get_pasien(filter)
+    delete_one_pasien(ide)
+    return Response(response = json.dumps(dict(cek)), mimetype="application/json", status=200)
+
 #mendapatkan data pasien berdasarkan perawat yang mengurus
 @bp.route('pasien/find/perawat/<id_perawat>')
 def cek_data_perawat_pasien(id_perawat):
@@ -100,3 +110,5 @@ def cek_data_perawat_pasien(id_perawat):
         print(ex)
         print("internal server error")
         return Response(response = json.dumps({"message" : "false"}), mimetype="application/json", status=500)
+
+
