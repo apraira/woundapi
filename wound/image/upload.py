@@ -9,7 +9,7 @@ import datetime
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 from wound.image import helper
-from wound.image.helper import get_images, get_imagess, image_list_by_id, insert_image, search_filename_from_id, update_image, get_image
+from wound.image.helper import get_images, get_imagess, image_list_by_id, insert_image, search_filename_from_id, update_id_pasien_image, update_id_perawat_image, update_image, get_image
 from wound.pasien.helper import  get_pasien, insert_pasien, get_pasien_ns
 from wound import utils
 from flask import Flask, jsonify
@@ -235,7 +235,7 @@ def post_svg():
 
         date = str(datetime.datetime.now().replace(microsecond=0)).replace("-","").replace(" ","_").replace(':', "")
 
-        filename = id_pasien + "_" + date + ".svg"
+        filename = id_pasien + "_tepi_" + date + ".svg"
         filepath = os.path.join(path, filename)
 
         svg_file = open(filepath, "w")
@@ -306,7 +306,7 @@ def post_svg_3():
 
         date = str(datetime.datetime.now().replace(microsecond=0)).replace("-","").replace(" ","_").replace(':', "")
 
-        filename = id_pasien + "_" + date + ".svg"
+        filename = id_pasien + "_diameter_" + date + ".svg"
         filepath = os.path.join(path, filename)
 
         svg_file = open(filepath, "w")
@@ -439,3 +439,73 @@ def image_list_id(id_pasien):
         print(ex)
         print("internal server error")
         return Response(response = json.dumps({"message" : "false"}), mimetype="application/json", status=500)
+
+
+#delete all collection
+@bp.route('/delete_coll', methods= ['DELETE'])
+def delete_all_collection():
+    
+    x = helper.delete_all_coll()
+    return Response(response = json.dumps(x), mimetype="application/json", status=200)
+
+@bp.route('upload/pasien/new', methods=['POST'])
+def coba_image_pasien():
+    old_id = request.form['id_pasien']
+    jenis = request.form['jenis']
+    new_id = request.form['isian']
+
+    try:
+        update_id_pasien_image(old_id, new_id)
+        return Response(response = json.dumps({"message" : "berhasil"}), mimetype="application/json", status=200)
+    
+            
+    except Exception as ex:
+        print (ex)
+        return Response(response = json.dumps({"message" : "false"}), mimetype="application/json", status=500)
+
+@bp.route('upload/perawat/new', methods=['POST'])
+def coba_image_perawat():
+    old_id = request.form['id_pasien']
+    jenis = request.form['jenis']
+    new_id = request.form['isian']
+
+    try:
+        update_id_perawat_image(old_id, new_id)
+        return Response(response = json.dumps({"message" : "berhasil"}), mimetype="application/json", status=200)
+    
+            
+    except Exception as ex:
+        print (ex)
+        return Response(response = json.dumps({"message" : "false"}), mimetype="application/json", status=500)
+
+
+@bp.route('image/update/anotasi', methods=['POST'])
+def anotasi_update():
+    file = request.files['image']
+    id_image = request.form['id_image']
+    
+
+    try:
+        if file and utils.allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                filename = utils.pad_timestamp(filename)
+                path = os.path.join(current_app.instance_path, current_app.config['UPLOAD_DIR'])
+                try:
+                    os.makedirs(path)
+                except OSError:
+                    pass
+                filepath = os.path.join(path, filename)
+                file.save(filepath)
+                        
+                filter ={}
+                filter['filename'] = filename
+                helper.update_filename_byid(id_image,filter)
+                              
+
+                print(filepath)
+                current_app.logger.debug(filepath);         
+                return Response(response = json.dumps({"message" : "true"}), mimetype="application/json", status=200)
+    except Exception as ex:
+            print (ex)
+            return Response(response = json.dumps({"message" : "error encountered"}), mimetype="application/json", status=500)       
+        

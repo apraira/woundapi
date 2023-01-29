@@ -7,7 +7,7 @@ import json
 
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
-from wound.data_kajian.helper import  delete_one_kajian, get_kajian, get_kajian_nrm, get_kajians, insert_kajian
+from wound.data_kajian.helper import  delete_one_kajian, get_kajian, get_kajian_nrm, get_kajians, insert_kajian, update_id_pasien_kajian, update_kajian
 from wound import utils
 from flask import Flask, jsonify
 from bson.objectid import ObjectId
@@ -104,4 +104,39 @@ def get_pasien_kajian(nrm):
         a.append(doc)
     return Response(response = json.dumps(a), mimetype="application/json", status=200)
 
+
+    #update data kajian
+@bp.route('/kajian/update', methods =['POST'])
+def update_data_kajian():
+
+    id_perawat = request.form['id_kajian']
+    jenis = request.form['jenis']
+    isian = request.form['isian']
+
+    filter = {}
+    filter[jenis] = isian
+
+    try:        
+        update_kajian(id_perawat, filter)
+        return Response(response = json.dumps({"message" : "berhasil"}), mimetype="application/json", status=200)
+    
+            
+    except Exception as ex:
+        print (ex)
+        return Response(response = json.dumps({"message" : "false"}), mimetype="application/json", status=500)
+
+@bp.route('kajian/pasien/new', methods=['POST'])
+def coba_kajian_pasien():
+    old_id = request.form['id_pasien']
+    jenis = request.form['jenis']
+    new_id = request.form['isian']
+
+    try:
+        update_id_pasien_kajian(old_id, new_id)
+        return Response(response = json.dumps({"message" : "berhasil"}), mimetype="application/json", status=200)
+    
+            
+    except Exception as ex:
+        print (ex)
+        return Response(response = json.dumps({"message" : "false"}), mimetype="application/json", status=500)
 

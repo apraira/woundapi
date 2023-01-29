@@ -70,6 +70,26 @@ def find_user(username,passw):
         print (ex)
         return Response(response = json.dumps({"message" : "false"}), mimetype="application/json", status=500)
 
+#update data user
+@bp.route('/user/update', methods =['POST'])
+def update_perawat():
+
+    id_perawat = request.form['id_perawat']
+    jenis = request.form['jenis']
+    isian = request.form['isian']
+
+    filter = {}
+    filter[jenis] = isian
+
+    try:        
+        update_user(id_perawat, filter)
+        return Response(response = json.dumps({"message" : "berhasil"}), mimetype="application/json", status=200)
+    
+            
+    except Exception as ex:
+        print (ex)
+        return Response(response = json.dumps({"message" : "false"}), mimetype="application/json", status=500)
+
 #cek perawat berdasarkan id atau username
 @bp.route('/user/<username>', methods =['GET'])
 def cek_data_perawat(username):
@@ -98,15 +118,59 @@ def cek_data_perawat(username):
         result["password"] = ""
 
        
-        if cek == None: 
+        if cek == None:
             return Response(response = json.dumps({"message" : "not found"}), mimetype="application/json", status=404)
         else:
             print(cek)
-            return Response(response = json.dumps(result), mimetype="application/json", status=200)
+            cek["password"] = ""
+            return Response(response = json.dumps(cek), mimetype="application/json", status=200)
 
     except Exception as ex:
         print(ex)
         return Response(response = json.dumps({"message" : "false"}), mimetype="application/json", status=500)
+
+
+#upload gambar
+@bp.route('/user/profile_img', methods =['POST'])
+def post_user_image():
+                 
+    #next save the file
+    
+    file = request.files['image']
+    id_perawat = request.form['id_perawat']
+
+    
+
+    try:
+        if file and utils.allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            filename = utils.pad_timestamp(filename)
+            path = os.path.join(current_app.instance_path, current_app.config['UPLOAD_DIR']).replace("uploads","")
+            fixed_path = os.path.join(path, "userImage")
+
+            filter = {}
+            filter["profile_image_url"] = "https://jft.web.id/woundapi/instance/userImage/" + filename
+
+            try:
+                os.makedirs(fixed_path)
+            except OSError:
+                pass
+            filepath = os.path.join(fixed_path, filename)
+            file.save(filepath)
+                       
+            filter = {}
+            filter["profile_image_url"] = "https://jft.web.id/woundapi/instance/userImage/" + filename
+
+            update_user(id_perawat, filter)           
+              
+
+            print(filepath)
+            current_app.logger.debug(filepath);         
+        return Response(response = json.dumps({"message" : "true"}), mimetype="application/json", status=200)
+        
+    except Exception as ex:
+        print (ex)
+        return Response(response = json.dumps({"message" : "error encountered"}), mimetype="application/json", status=500)
 
 
 """#delete

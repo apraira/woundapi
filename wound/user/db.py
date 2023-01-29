@@ -36,9 +36,17 @@ def insert_user(data):
     return row
 
 
-def update_user(filter, update):
-    collection = get_collection("user")    
-    return collection.update_one(filter, update, upsert=False)    
+def update_user(id_perawat, filter):
+    collection = get_collection('user')
+
+    #cursor ke data pasien sesuai dengan id
+    x = collection.find_one({ '_id' : id_perawat })
+    #query ke id pasien + update data
+    a = int(id_perawat)
+    myquery = { '_id' : a }
+    print(filter)
+    newvalues = { '$set': filter }
+    return collection.update_one(myquery, newvalues, upsert=False)   
 
 def delete_user(data):
     collection = get_collection("user")
@@ -71,6 +79,9 @@ def update_pasien(filter, update):
 def delete_pasien(data):
     collection = get_collection("pasien")
     collection.delete_one(data)
+
+
+    
 
 
 

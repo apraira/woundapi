@@ -103,8 +103,55 @@ def delete_one_image(id):
     collection = get_collection("image")    
     return collection.delete_one({"_id":id})
 
+def delete_all_coll():
+    collection = get_collection("image")
+    collection.delete_many({})
+
+    collection = get_collection("user")
+    collection.delete_many({})
+
+    collection = get_collection("pasien")
+    collection.delete_many({})  
+
+    collection = get_collection("kajian") 
+    x = collection.delete_many({})   
+
+    list = { "jumlah" : x.deleted_count }   
+
+    return list
+
 
 #cari list images dr id pasien
 def image_list_by_id(data):
     collection = get_collection("image")
     return collection.find(data)
+
+def update_id_pasien_image(old_id, new_id):
+    collection = get_collection('image')
+
+    return collection.update_many(
+    {"id_pasien": old_id },
+        {
+            "$set": { "id_pasien" : new_id}
+        }
+    )
+
+def update_id_perawat_image(old_id, new_id):
+    collection = get_collection('image')
+
+    return collection.update_many(
+    {"id_perawat": old_id },
+        {
+            "$set": { "id_perawat" : new_id}
+        }
+    )
+
+def update_filename_byid(id_image, filter):
+    collection = get_collection('image')
+
+    #cursor ke data pasien sesuai dengan id
+    x = collection.find_one({ '_id' : id_image })
+    myquery = { '_id' : id_image }
+    print(filter)
+    newvalues = { '$set': filter }
+    return collection.update_one(myquery, newvalues, upsert=False) 

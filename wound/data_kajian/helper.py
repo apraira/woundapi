@@ -1,9 +1,5 @@
-from typing import Collection
-import click
 import pymongo
 from flask import current_app, g
-from flask.cli import with_appcontext
-import gridfs
 
 def get_db():
     mongocon = current_app.config['MONGO_CON']
@@ -16,9 +12,7 @@ def get_collection(colname):
         get_db()
     return g.db[colname]
 
-
-#data pasien query
-#fungsi khusus untuk  mencari data yang berhubungan dengan pasien
+#semua kajian
 def get_kajians(filter={}):
     collection = get_collection("kajian")
     return collection.find(filter)
@@ -44,3 +38,25 @@ def insert_kajian(data):
 def delete_one_kajian(id):
     collection = get_collection("kajian")    
     return collection.delete_one({"_id":id})
+
+def update_kajian(id, filter):
+    collection = get_collection('kajian')
+
+    #cursor ke data pasien sesuai dengan id
+    x = collection.find_one({ '_id' : id })
+    #query ke id pasien + update data
+    #a = int(id)
+    myquery = { '_id' : id }
+    print(filter)
+    newvalues = { '$set': filter }
+    return collection.update_one(myquery, newvalues, upsert=False)
+
+def update_id_pasien_kajian(old_id, new_id):
+    collection = get_collection('kajian')
+
+    return collection.update_many(
+    {"id_pasien": old_id },
+        {
+            "$set": { "id_pasien" : new_id}
+        }
+    )

@@ -17,6 +17,7 @@
     <thead>
       <tr>
         <th scope="col">#</th>
+        <th scope="col">ID Log</th>
         <th scope="col">ID User</th>
         <th scope="col">Activity</th>
         <th scope="col">Created At</th>
@@ -27,6 +28,7 @@
         {% for item in navigation %}
         <tr>
             <th scope="row">{{ loop.index }}</th>
+            <td>{{ item['_id'] }}</td>
             <td>{{ item['id_perawat'] }}</td>
             <td>{{ item['activity'] }}</td>
             <td>{{ item['created_at'] }}</td>

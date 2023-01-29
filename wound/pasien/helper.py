@@ -43,5 +43,42 @@ def delete_pasien(data):
     collection.delete_one(data)
 
 def delete_one_pasien(id):
+    collection = get_collection("kajian")  
+    collection.delete_many({"id_pasien":id})
+    
+
+    collection = get_collection("image")  
+    collection.delete_many({"id_pasien":id})
+
     collection = get_collection("pasien")    
     return collection.delete_one({"_id":id})
+
+def update_pasien_new(id, filter):
+    collection = get_collection('pasien')
+
+    #cursor ke data pasien sesuai dengan id
+    x = collection.find_one({ '_id' : id })
+    #query ke id pasien + update data
+    #a = int(id)
+    myquery = { '_id' : id }
+    print(filter)
+    newvalues = { '$set': filter }
+    return collection.update_one(myquery, newvalues, upsert=False)
+
+def update_id(old_id, new_id):
+    collection = get_collection('pasien')
+    old_doc_id = old_id
+    new_doc_id = new_id
+
+    doc = collection.find_one({'_id': old_doc_id})
+
+    if doc is not None:
+        #  set a new _id on the document
+        doc['_id'] = new_doc_id
+
+        # insert the document, using the new _id
+        collection.insert_one(doc)
+
+    
+        # remove the document with the old _id
+        return collection.delete_one({'_id':old_doc_id})
